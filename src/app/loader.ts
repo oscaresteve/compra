@@ -11,9 +11,7 @@ export async function loadAppData(): Promise<{ items: ItemView[] }> {
 
   try {
     const items = await prisma.item.findMany({
-      orderBy: {
-        checked: "asc",
-      },
+      orderBy: [{ checked: "asc" }, { updatedAt: "desc" }],
     });
 
     return {
