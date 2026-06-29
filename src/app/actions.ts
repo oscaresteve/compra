@@ -28,8 +28,6 @@ export async function deleteItemAction(formData: FormData) {
   const user = await auth.protect();
   const itemId = formData.get("itemId") as string;
 
-  console.log(itemId)
-
   if (!user) return;
 
   try {
@@ -37,6 +35,24 @@ export async function deleteItemAction(formData: FormData) {
       where: {
         id: itemId,
       },
+    });
+    revalidatePath("/");
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function checkItemAction(isChecked: boolean, formData: FormData) {
+  const user = await auth.protect();
+  const itemId = formData.get("itemId") as string;
+
+  const checked = !isChecked;
+
+  if (!user) return;
+  try {
+    await prisma.item.update({
+      where: { id: itemId },
+      data: { checked },
     });
     revalidatePath("/");
   } catch (error) {

@@ -1,5 +1,5 @@
 "use client";
-import { createItemAction, deleteItemAction } from "@/app/actions";
+import { checkItemAction, createItemAction, deleteItemAction } from "@/app/actions";
 import { ItemView } from "@/lib/types";
 import { CircleDashed, CircleCheckBig, Plus, X } from "lucide-react";
 import Image from "next/image";
@@ -24,7 +24,12 @@ export default function ItemsList({ items, avatarMap }: ItemsListProps) {
 
         return (
           <li key={item.id} className="flex gap-6 items-center py-1 px-3 group">
-            <Icon className={`size-5 ${isChecked && "opacity-75"}`} />
+            <form action={checkItemAction.bind(null, isChecked)} className="flex items-center">
+              <input type="hidden" name="itemId" value={item.id} />
+              <button type="submit" className="cursor-pointer">
+                <Icon className={`size-5 ${isChecked && "opacity-75"}`} />
+              </button>
+            </form>
             <p className={`text-base ${isChecked && "opacity-75 line-through"}`}>{item.text}</p>
             <div className="flex gap-4 ml-auto items-center">
               {user && (
