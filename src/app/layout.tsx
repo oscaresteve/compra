@@ -17,7 +17,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es" className={comicNeue.className}>
       <ClerkProvider>
-        <body className="scheme-dark bg-black text-white">
+        <body className="scheme-dark bg-[#1c1c1e] text-white">
           <AppHeader />
           {children}
         </body>
