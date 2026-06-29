@@ -1,8 +1,28 @@
-import { readAllItems } from "@/lib/queries";
+"use server";
+
+import { prisma } from "@/lib/prisma";
 import { ItemView } from "@/lib/types";
+import { auth } from "@clerk/nextjs/server";
 
 export async function loadAppData(): Promise<{ items: ItemView[] }> {
-  const items = await readAllItems();
-  if (!items) return { items: [] };
-  return { items };
+  const user = await auth.protect();
+
+  if (!user) return { items: [] };
+
+  try {
+    const items = await prisma.item.findMany({
+      orderBy: {
+        checked: "asc",
+      },
+    });
+
+    return {
+      items: items,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      items: [],
+    };
+  }
 }
