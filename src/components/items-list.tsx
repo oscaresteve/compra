@@ -1,8 +1,10 @@
 "use client";
 import { checkItemAction, createItemAction, deleteItemAction } from "@/app/actions";
 import { ItemView } from "@/lib/types";
-import { CircleDashed, CircleCheckBig, Plus, X } from "lucide-react";
+import { CircleDashed, CircleCheckBig, Loader2, Plus, X } from "lucide-react";
 import Image from "next/image";
+import { useFormStatus } from "react-dom";
+import { useRef } from "react";
 
 type ItemsListProps = {
   items: ItemView[];
@@ -14,21 +16,75 @@ type ItemsListProps = {
   };
 };
 
+function CheckButton({ isChecked }: { isChecked: boolean }) {
+  const { pending } = useFormStatus();
+  const Icon = isChecked ? CircleCheckBig : CircleDashed;
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="p-1 -m-1 active:scale-90 transition-transform cursor-pointer disabled:cursor-not-allowed"
+    >
+      {pending ? (
+        <Loader2 className="size-5 text-neutral-400 animate-spin" />
+      ) : (
+        <Icon className={`size-5 ${isChecked ? "text-neutral-600" : "text-neutral-100"}`} />
+      )}
+    </button>
+  );
+}
+
+function DeleteButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="p-1 -m-1 text-neutral-600 active:text-red-400 transition-colors cursor-pointer disabled:cursor-not-allowed"
+    >
+      {pending ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4" />}
+    </button>
+  );
+}
+
+function CreateItemInput() {
+  const { pending } = useFormStatus();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      <Plus className={`size-5 shrink-0 ${pending ? "text-neutral-600 animate-pulse" : "text-neutral-400"}`} />
+      <input
+        ref={inputRef}
+        type="text"
+        placeholder="Añadir item..."
+        name="text"
+        disabled={pending}
+        className="flex-1 text-base text-neutral-100 placeholder:text-neutral-600 focus:outline-none bg-transparent disabled:opacity-50"
+        onBlur={(e) => {
+          const value = e.currentTarget.value.trim();
+          if (value) e.currentTarget.form?.requestSubmit();
+        }}
+      />
+      {pending && <Loader2 className="size-4 text-neutral-600 animate-spin shrink-0" />}
+    </>
+  );
+}
+
 export default function ItemsList({ items, avatarMap }: ItemsListProps) {
   return (
     <ul className="flex flex-col divide-y divide-neutral-800">
       {items.map((item) => {
         const isChecked = item.checked;
-        const Icon = isChecked ? CircleCheckBig : CircleDashed;
         const user = avatarMap[item.clerkId];
 
         return (
           <li key={item.id} className="flex gap-4 items-center py-3 px-4">
             <form action={checkItemAction.bind(null, isChecked)} className="flex items-center">
               <input type="hidden" name="itemId" value={item.id} />
-              <button type="submit" className="p-1 -m-1 active:scale-90 transition-transform cursor-pointer">
-                <Icon className={`size-5 ${isChecked ? "text-neutral-600" : "text-neutral-100"}`} />
-              </button>
+              <CheckButton isChecked={isChecked} />
             </form>
 
             <p
@@ -50,12 +106,7 @@ export default function ItemsList({ items, avatarMap }: ItemsListProps) {
               )}
               <form action={deleteItemAction} className="flex items-center">
                 <input type="hidden" name="itemId" value={item.id} />
-                <button
-                  type="submit"
-                  className="p-1 -m-1 text-neutral-600 active:text-red-400 transition-colors cursor-pointer"
-                >
-                  <X className="size-4" />
-                </button>
+                <DeleteButton />
               </form>
             </div>
           </li>
@@ -64,17 +115,7 @@ export default function ItemsList({ items, avatarMap }: ItemsListProps) {
 
       <li>
         <form action={createItemAction} className="flex gap-4 items-center py-3 px-4">
-          <Plus className="size-5 text-neutral-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Añadir item..."
-            name="text"
-            className="flex-1 text-base text-neutral-100 placeholder:text-neutral-600 focus:outline-none bg-transparent"
-            onBlur={(e) => {
-              const value = e.currentTarget.value.trim();
-              if (value) e.currentTarget.form?.requestSubmit();
-            }}
-          />
+          <CreateItemInput />
         </form>
       </li>
     </ul>
