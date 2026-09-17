@@ -42,6 +42,19 @@ export async function deleteItemAction(formData: FormData) {
   }
 }
 
+export async function deleteAllItemsAction() {
+  const user = await auth.protect();
+
+  if (!user) return;
+
+  try {
+    await prisma.item.deleteMany({});
+    revalidatePath("/");
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export async function checkItemAction(isChecked: boolean, formData: FormData) {
   const user = await auth.protect();
   const itemId = formData.get("itemId") as string;
